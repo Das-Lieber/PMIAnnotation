@@ -59,9 +59,22 @@ void DiamensionInput::on_pushButton_sure_clicked()
         return;
     }
 
-    mainVal = ui->lineEdit_mainVal->text().toStdString().data();
-    upVal = ui->lineEdit_upVal->text().toStdString().data();
-    lowVal = ui->lineEdit_lowVal->text().toStdString().data();
+    
+	
+	QString subStr = ui->lineEdit_lowVal->text();
+	QString supStr = ui->lineEdit_upVal->text();
+	
+    if(subStr.toDouble() > 0 && !subStr.contains('+')) {
+        subStr.prepend('+');
+	}
+    if(supStr.toDouble() > 0 && !supStr.contains('+')) {
+        supStr.prepend('+');
+	}
+
+	mainVal = ui->lineEdit_mainVal->text().toStdString().data();
+	upVal = supStr.toStdString().data();
+    lowVal = subStr.toStdString().data();
+	
     if(mainVal.IsEmpty()) {
         QMessageBox::critical(this,"错误","未输入主尺寸!");
         return;

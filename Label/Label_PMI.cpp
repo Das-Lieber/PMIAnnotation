@@ -143,7 +143,7 @@ TopoDS_Shape Label_PMI::ComputeStringWithSupAndSub(const NCollection_Utf8String 
                                                    const NCollection_Utf8String &sup,
                                                    Standard_Real &width)
 {
-    if(main.IsEmpty() || sub.IsEmpty() || sup.IsEmpty())
+    if(main.IsEmpty())
         return TopoDS_Shape();
 
     TopoDS_Compound result;
@@ -172,7 +172,7 @@ TopoDS_Shape Label_PMI::ComputeStringWithSupAndSub(const NCollection_Utf8String 
 
     Standard_Real widSub = calculateStringWidth(sub);
     Standard_Real widSup = calculateStringWidth(sup);
-    width += qMax(widSub,widSup);
+    width += 0.5*qMax(widSub,widSup);
 
     BRepBuilderAPI_Transform aTransform(subShape,subTrsf);
     BRepBuilderAPI_Transform bTransform(supShape,supTrsf);

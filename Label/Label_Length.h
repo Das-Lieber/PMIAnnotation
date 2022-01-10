@@ -38,6 +38,11 @@ protected:
     virtual void ComputeSelection (const Handle(SelectMgr_Selection)& theSelection,
                                    const Standard_Integer theMode) Standard_OVERRIDE;
 
+    void JudgeTextOut(bool& left, bool& right);
+
+    void ComputeFlyOut (const Handle(Prs3d_Presentation)& thePrs,
+                        const Handle(Prs3d_ShadingAspect)& anAspect);
+
 protected:
 
     NCollection_Utf8String myMainStr;
@@ -48,6 +53,9 @@ protected:
 
     gp_Pnt myFirstPnt;
     gp_Pnt mySecondPnt;
+
+    gp_Pnt myFirstOut;
+    gp_Pnt mySecondOut;
 
 public:
 

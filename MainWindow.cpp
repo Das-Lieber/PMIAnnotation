@@ -363,7 +363,7 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             Handle(Label_Length) aLabel = new Label_Length();
             aLabel->SetData(valList[0],valList[1],valList[2]);
 
-            gp_Dir normal = place.Axis().Direction();
+            gp_Dir normal = place.Axis().Direction().Reversed();
             gp_Dir lin(p2.XYZ()-p1.XYZ());
             if(!lin.IsNormal(normal, 1e-6)) {
                 QMessageBox::critical(this,"错误","所选放置面法向不与直线垂直!");
