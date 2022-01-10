@@ -350,6 +350,8 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
                                        const gp_Pln& place, int type)
 {
     Handle(PrsDim_Dimension) label;
+    Handle(AIS_Shape) pMd = new AIS_Shape(pmiModel->GetOriginShape());
+    Bnd_Box box = pMd->BoundingBox();
     switch(type)
     {
     //尺寸
@@ -360,9 +362,6 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             gp_Pnt p1 = BRep_Tool::Pnt (vertex1);
             gp_Pnt p2 = BRep_Tool::Pnt (vertex2);
 
-            Handle(Label_Length) aLabel = new Label_Length();
-            aLabel->SetData(valList[0],valList[1],valList[2]);
-
             gp_Dir normal = place.Axis().Direction().Reversed();
             gp_Dir lin(p2.XYZ()-p1.XYZ());
             if(!lin.IsNormal(normal, 1e-6)) {
@@ -371,17 +370,10 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             }
 
             gp_Pnt mid = 0.5*(p1.XYZ() + p2.XYZ());
-            Handle(AIS_Shape) pMd = new AIS_Shape(pmiModel->GetOriginShape());
-            Bnd_Box box = pMd->BoundingBox();
             gp_Pnt target = targetWithBox(mid,normal,box);
+            gp_Ax2 oriention(target, normal, lin);
 
-            gp_Ax2 oriention;
-            oriention.SetLocation(target);
-            oriention.SetDirection(normal);
-            oriention.SetXDirection(lin);
-
-            aLabel->SetDiamension(p1,p2);
-            aLabel->SetOriention(oriention);
+            Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
             occWidget->GetContext()->Display(aLabel, Standard_True);
             return;
 //            label = new PrsDim_LengthDimension(p1,p2,gp_Pln(p1,place.Axis().Direction()));
@@ -418,18 +410,12 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
                     return;
                 }
 
-                gp_Pnt p1 = axis1.Location();
-                gp_Pnt p2 = axis2.Location();
-                gp_Dir pp(p2.XYZ()-p1.XYZ());
-                gp_Dir c2 = axis2.Direction();
-                gp_Dir normal = c2.Crossed(pp);
-                //转轴所在平面
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,normal);
-                Handle(Geom_Line) line = new Geom_Line(gp_Lin(axis2));
-                GeomAPI_ProjectPointOnCurve PPC(p1,line);
-                // p1在第二个轴上的最近点
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
+                gp_Pnt p1 ,p2;gp_Ax2 oriention;
+                dimensionOfTwoAxis(box, axis1, axis2, p1, p2, oriention);
+                Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
+                occWidget->GetContext()->Display(aLabel, Standard_True);
+                return;
+//                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
             }
             //两个平面
             else if(retb1 && retb2){
@@ -529,18 +515,11 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
                     return;
                 }
 
-                gp_Pnt p1 = axis1.Location();
-                gp_Pnt p2 = lin2.Location();
-                gp_Dir pp(p2.XYZ()-p1.XYZ());
-                gp_Dir c2 = lin2.Direction();
-                gp_Dir normal = c2.Crossed(pp);
-                //转轴所在平面
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,normal);
-                Handle(Geom_Line) line = new Geom_Line(lin2);
-                GeomAPI_ProjectPointOnCurve PPC(p1,line);
-                // p1在第二个轴上的最近点
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
+                gp_Pnt p1 ,p2;gp_Ax2 oriention;
+                dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
+                Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
+                occWidget->GetContext()->Display(aLabel, Standard_True);
+                return;
             }
             //旋转面和圆弧
             else if(reta1 && retb2) {
@@ -996,4 +975,24 @@ gp_Pnt MainWindow::targetWithBox(const gp_Pnt &input, const gp_Dir &dir, const B
 
     target = input.XYZ() + 1.2*dif*dir.XYZ();
     return target;
+}
+
+void MainWindow::dimensionOfTwoAxis(const Bnd_Box &box, const gp_Ax1 &ax1, const gp_Ax1 &ax2, gp_Pnt &first, gp_Pnt &second, gp_Ax2 &oriention)
+{
+    gp_Pnt p1 = ax1.Location();
+    gp_Pnt p2 = ax2.Location();
+    gp_Dir pp(p1.XYZ()-p2.XYZ());
+    gp_Dir c2 = ax2.Direction();
+    gp_Dir normal = c2.Crossed(pp);
+
+    Handle(Geom_Line) line = new Geom_Line(gp_Lin(ax2));
+    GeomAPI_ProjectPointOnCurve PPC(p1,line);
+
+    gp_Pnt p3 = PPC.NearestPoint();
+
+    gp_Pnt mid = 0.5*(p1.XYZ() + p3.XYZ());
+    gp_Pnt target = targetWithBox(mid,c2,box);
+    first = p1;
+    second = p3;
+    oriention = gp_Ax2(target, normal, p3.XYZ()-p1.XYZ());
 }

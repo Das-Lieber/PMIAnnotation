@@ -25,6 +25,7 @@ private slots:
     void on_pushButton_sure_clicked();
     void on_pushButton_cancle_clicked();
     void on_pushButton_selectPlace_clicked();
+    void on_comboBox_measureType_currentIndexChanged(int index);
 
 private:
     Ui::DiamensionInput *ui;

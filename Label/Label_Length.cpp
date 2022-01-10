@@ -19,6 +19,20 @@ Label_Length::Label_Length()
 {
 }
 
+Label_Length::Label_Length(const NCollection_Utf8StringList &values,
+                           const gp_Pnt &first, const gp_Pnt &second,
+                           const gp_Ax2 &oriention)
+{
+    myMainStr = values[0];
+    mySUPStr = values[1];
+    mySUBStr = values[2];
+
+    myFirstPnt = first;
+    mySecondPnt = second;
+    myOrientation3D = oriention;
+    myHasOrientation3D = Standard_True;
+}
+
 void Label_Length::SetLocation(const gp_Pnt &pnt)
 {
     myHasOrientation3D = Standard_True;

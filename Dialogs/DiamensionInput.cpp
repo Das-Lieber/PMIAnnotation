@@ -590,3 +590,30 @@ void DiamensionInput::on_pushButton_selectPlace_clicked()
     selectPlace = true;
     emit requestSelectShape();
 }
+
+void DiamensionInput::on_comboBox_measureType_currentIndexChanged(int index)
+{
+    diamensionType = index;
+    switch(index)
+        {
+        case 0:{
+            ui->stackedWidget_element->setCurrentIndex(0);
+            ui->stackedWidget_reference->setCurrentIndex(1);
+        }break;
+        case 1:
+        case 2:{
+            ui->stackedWidget_element->setCurrentIndex(1);
+            ui->stackedWidget_reference->setCurrentIndex(0);
+        }break;
+        case 3:
+        case 4:{
+            ui->stackedWidget_element->setCurrentIndex(0);
+            ui->stackedWidget_reference->setCurrentIndex(0);
+        }break;
+        case 5:{
+            ui->stackedWidget_element->setCurrentIndex(0);
+            ui->stackedWidget_reference->setCurrentIndex(0);
+        }break;
+        }
+}
+

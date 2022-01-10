@@ -11,6 +11,11 @@ public:
     //! Default constructor
     Label_Length();
 
+    //! Construct the label with data
+    Label_Length(const NCollection_Utf8StringList& values,
+                 const gp_Pnt& first, const gp_Pnt& second,
+                 const gp_Ax2& oriention);
+
     //! Set location of shape, interface for drafting
     virtual void SetLocation(const gp_Pnt& pnt) override;
 

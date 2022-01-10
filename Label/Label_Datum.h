@@ -14,6 +14,9 @@ public:
     //! Set location of shape, interface for drafting
     virtual void SetLocation(const gp_Pnt& pnt) override;
 
+    //! Setup position.
+    void SetPosture (const gp_Pnt& touchPnt, const gp_Ax2& oriention);
+
     //! Setup text.
     void SetDatumName (const NCollection_Utf8String& name);
 

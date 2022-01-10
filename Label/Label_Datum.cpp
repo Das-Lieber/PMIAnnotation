@@ -36,6 +36,12 @@ void Label_Datum::SetLocation(const gp_Pnt &pnt)
     this->GetContext()->RecomputeSelectionOnly(this);
 }
 
+void Label_Datum::SetPosture(const gp_Pnt &touchPnt, const gp_Ax2 &oriention)
+{
+    SetOriention(oriention);
+    myTouchPoint = touchPnt;
+}
+
 void Label_Datum::SetDatumName (const NCollection_Utf8String &name)
 {
     myDatumName = name;
