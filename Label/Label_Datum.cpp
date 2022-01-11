@@ -1,4 +1,4 @@
-﻿ #include "Label_Datum.h"
+﻿#include "Label_Datum.h"
 
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <Font_BRepTextBuilder.hxx>
@@ -58,8 +58,8 @@ Standard_Real Label_Datum::LabelWidth() const
 }
 
 void Label_Datum::Compute (const Handle(PrsMgr_PresentationManager3d)& /*thePrsMgr*/,
-                               const Handle(Prs3d_Presentation)& thePrs,
-                               const Standard_Integer theMode)
+                           const Handle(Prs3d_Presentation)& thePrs,
+                           const Standard_Integer theMode)
 {
     switch (theMode)
     {
@@ -103,7 +103,7 @@ void Label_Datum::Compute (const Handle(PrsMgr_PresentationManager3d)& /*thePrsM
 }
 
 void Label_Datum::ComputeSelection (const Handle(SelectMgr_Selection)& theSelection,
-                                        const Standard_Integer             theMode)
+                                    const Standard_Integer             theMode)
 {
     switch (theMode)
     {
@@ -135,7 +135,7 @@ void Label_Datum::ComputeSelection (const Handle(SelectMgr_Selection)& theSelect
 }
 
 void Label_Datum::appendLeadOfLabel(const Handle(Prs3d_Presentation)& thePrs,
-                                        const Handle(Prs3d_ShadingAspect)& anAspect)
+                                    const Handle(Prs3d_ShadingAspect)& anAspect)
 {
     gp_Trsf apply = calculateOrientionTrsf();
     Standard_Real aWidth = calculateStringWidth(myDatumName);

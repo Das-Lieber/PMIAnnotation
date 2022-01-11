@@ -59,22 +59,22 @@ void AIS_DraftPoint::setMyEditable(bool newMyEditable)
 }
 
 void AIS_DraftPoint::Compute(const Handle(PrsMgr_PresentationManager3d)& /*aPresentationManager*/,
-                        const Handle(Prs3d_Presentation)& aPresentation,
-                        const Standard_Integer aMode)
+                             const Handle(Prs3d_Presentation)& aPresentation,
+                             const Standard_Integer aMode)
 {
-  aPresentation->SetInfiniteState(myInfiniteState);
+    aPresentation->SetInfiniteState(myInfiniteState);
 
-  if (aMode==0){
-      Handle(Geom_CartesianPoint) pt = new Geom_CartesianPoint(myPnt);
-    StdPrs_Point::Add(aPresentation,pt,myDrawer);
-  }
-  else if (aMode== -99)
+    if (aMode==0){
+        Handle(Geom_CartesianPoint) pt = new Geom_CartesianPoint(myPnt);
+        StdPrs_Point::Add(aPresentation,pt,myDrawer);
+    }
+    else if (aMode== -99)
     {
-      Handle(Graphic3d_Group) TheGroup = aPresentation->CurrentGroup();
-      TheGroup->SetPrimitivesAspect (myHilightDrawer->PointAspect()->Aspect());
-      Handle(Graphic3d_ArrayOfPoints) aPoint = new Graphic3d_ArrayOfPoints (1);
-      aPoint->AddVertex (myPnt.X(),myPnt.Y(),myPnt.Z());
-      TheGroup->AddPrimitiveArray (aPoint);
+        Handle(Graphic3d_Group) TheGroup = aPresentation->CurrentGroup();
+        TheGroup->SetPrimitivesAspect (myHilightDrawer->PointAspect()->Aspect());
+        Handle(Graphic3d_ArrayOfPoints) aPoint = new Graphic3d_ArrayOfPoints (1);
+        aPoint->AddVertex (myPnt.X(),myPnt.Y(),myPnt.Z());
+        TheGroup->AddPrimitiveArray (aPoint);
     }
 
 }
@@ -84,10 +84,10 @@ void AIS_DraftPoint::Compute(const Handle(PrsMgr_PresentationManager3d)& /*aPres
 //purpose  :
 //=======================================================================
 void AIS_DraftPoint::ComputeSelection(const Handle(SelectMgr_Selection)& aSelection,
-                                 const Standard_Integer /*aMode*/)
+                                      const Standard_Integer /*aMode*/)
 {
-  Handle(SelectMgr_EntityOwner) eown = new SelectMgr_EntityOwner(this,10);
-  Handle(Select3D_SensitivePoint) sp = new Select3D_SensitivePoint(eown,
-                                   myPnt);
-  aSelection->Add(sp);
+    Handle(SelectMgr_EntityOwner) eown = new SelectMgr_EntityOwner(this,10);
+    Handle(Select3D_SensitivePoint) sp = new Select3D_SensitivePoint(eown,
+                                                                     myPnt);
+    aSelection->Add(sp);
 }

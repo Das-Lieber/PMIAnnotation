@@ -26,7 +26,7 @@ class TolBaseInput : public QWidget
 
 public:
     TolBaseInput(const int &symbolIndex, const QList<BaseEditState>& states, QWidget *parent = nullptr);
-    ~TolBaseInput();    
+    ~TolBaseInput();
 
 protected:
     bool eventFilter(QObject* watched, QEvent*event);

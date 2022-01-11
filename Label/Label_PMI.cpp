@@ -9,8 +9,8 @@ IMPLEMENT_STANDARD_RTTIEXT(Label_PMI,AIS_DraftShape)
 Label_PMI::Label_PMI()
     : myHasOrientation3D(Standard_False),
       myLabelZoomable(Standard_True),
-      myFontHeight(6),
-      myFontPadding(3),
+      myFontHeight(4),
+      myFontPadding(2),
       myLabelColor(Quantity_NOC_BLACK)
 {
     myDrawer->SetDisplayMode (0);

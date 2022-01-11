@@ -1,5 +1,4 @@
-﻿
-#include "GeneralTools.h"
+﻿#include "GeneralTools.h"
 #include <ShapeBuild_ReShape.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Edge.hxx>
@@ -91,14 +90,14 @@ void GeneralTools::CalcBoundingBoxPts(TopoDS_Shape targetShape,gp_Pnt& minpt,gp_
 }
 TopoDS_Shape GeneralTools::MakeCompoundFromShapes(list<TopoDS_Shape> origalShapes)
 {
-     TopoDS_Compound aRes;
-     BRep_Builder aBuilder;
-     aBuilder.MakeCompound (aRes);
-     for (list<TopoDS_Shape>::iterator it = origalShapes.begin();it != origalShapes.end();it++)
-     {
-         aBuilder.Add (aRes, *it);
-     }
-     return aRes;
+    TopoDS_Compound aRes;
+    BRep_Builder aBuilder;
+    aBuilder.MakeCompound (aRes);
+    for (list<TopoDS_Shape>::iterator it = origalShapes.begin();it != origalShapes.end();it++)
+    {
+        aBuilder.Add (aRes, *it);
+    }
+    return aRes;
 }
 list<gp_Pnt> GeneralTools::getPointsFromEdges(TopoDS_Shape aedge,int Num)
 {
@@ -244,7 +243,7 @@ gp_Vec GeneralTools::getNormalByPointOnFace(gp_Pnt P,TopoDS_Face face)
         normal.SetCoord(dir.X(),dir.Y(),dir.Z());
         TopAbs_Orientation orient = face.Orientation();
         if (orient!=TopAbs_FORWARD)
-           normal.Reverse();
+            normal.Reverse();
     }
     else
     {
@@ -253,9 +252,9 @@ gp_Vec GeneralTools::getNormalByPointOnFace(gp_Pnt P,TopoDS_Face face)
         {
             BRepGProp_Face theFace(face);
             theFace.Normal(U, V, P, normal);
-//            gp_Vec D1U,D1V;
-//            aSurface->D1(U,V,P,D1U,D1V);
-//            normal = D1U.Crossed(D1V);
+            //            gp_Vec D1U,D1V;
+            //            aSurface->D1(U,V,P,D1U,D1V);
+            //            normal = D1U.Crossed(D1V);
         }
         else
         {
@@ -308,7 +307,7 @@ list<gp_Pnt> GeneralTools::DiscreteShapeToPoints(TopoDS_Shape shape,bool isEdge)
             {
                 if(pts.back().Distance(ptsedges.front()) > pts.back().Distance(ptsedges.back()))
                 {
-                   ptsedges.reverse();
+                    ptsedges.reverse();
                 }
             }
             list<gp_Pnt>::iterator it = pts.begin();
@@ -593,7 +592,7 @@ double GeneralTools::GetHeightForPlaneFace(TopoDS_Shape Shape,gp_Vec V,gp_Pnt &e
         {
             if(sanEdgeCurve.GetType() == GeomAbs_Line)
                 lin = sanEdgeCurve.Line();
-             gp_Dir dirV = lin.Direction();
+            gp_Dir dirV = lin.Direction();
             if(dirV.IsParallel(V,tol))
             {
                 GProp_GProps System;
@@ -652,57 +651,57 @@ bool GeneralTools::CompareCylinder(gp_Cylinder cylind1,gp_Cylinder cylind2)
     return false;
 }
 gp_Pnt GeneralTools::GetMiddlePointOnFace(TopoDS_Face aFace)
- {
-     gp_Pnt Pt;
-     BRepGProp_Face theSurface(aFace);
-     Standard_Real LowerU, UpperU, LowerV, UpperV;
-     theSurface.Bounds(LowerU, UpperU, LowerV, UpperV);
-     const Standard_Integer UOrder = Min(theSurface.UIntegrationOrder(), math::GaussPointsMax());
-     const Standard_Integer VOrder = Min(theSurface.VIntegrationOrder(), math::GaussPointsMax());
-     math_Vector GaussPU(1, UOrder);
-     math_Vector GaussPV(1, VOrder);
-     math::GaussPoints (UOrder, GaussPU);
-     math::GaussPoints (VOrder, GaussPV);
-     const Standard_Real um = 0.5 * (UpperU+  LowerU);
-     const Standard_Real vm = 0.5 * (UpperV+  LowerV);
-     Standard_Real ur = 0.5 * (UpperU-LowerU);
-     Standard_Real vr = 0.5 * (UpperV-LowerV);
-     const Standard_Real v = vm+vr*GaussPV(VOrder/2);
-     const Standard_Real u = um+ur*GaussPU (UOrder/2);
-     gp_Vec aNormal;
-     theSurface.Normal(u, v, Pt, aNormal);
-     return Pt;
- }
+{
+    gp_Pnt Pt;
+    BRepGProp_Face theSurface(aFace);
+    Standard_Real LowerU, UpperU, LowerV, UpperV;
+    theSurface.Bounds(LowerU, UpperU, LowerV, UpperV);
+    const Standard_Integer UOrder = Min(theSurface.UIntegrationOrder(), math::GaussPointsMax());
+    const Standard_Integer VOrder = Min(theSurface.VIntegrationOrder(), math::GaussPointsMax());
+    math_Vector GaussPU(1, UOrder);
+    math_Vector GaussPV(1, VOrder);
+    math::GaussPoints (UOrder, GaussPU);
+    math::GaussPoints (VOrder, GaussPV);
+    const Standard_Real um = 0.5 * (UpperU+  LowerU);
+    const Standard_Real vm = 0.5 * (UpperV+  LowerV);
+    Standard_Real ur = 0.5 * (UpperU-LowerU);
+    Standard_Real vr = 0.5 * (UpperV-LowerV);
+    const Standard_Real v = vm+vr*GaussPV(VOrder/2);
+    const Standard_Real u = um+ur*GaussPU (UOrder/2);
+    gp_Vec aNormal;
+    theSurface.Normal(u, v, Pt, aNormal);
+    return Pt;
+}
 
 
 bool GeneralTools::JudgePointOnFace(gp_Pnt P, TopoDS_Shape aFace)
- {
-     BRepClass3d_SolidClassifier aSC(aFace);
-     aSC.Perform(P,Precision::Confusion());  //设置容差
-     TopAbs_State aState = aSC.State();
-     if(aState == TopAbs_ON)
-         return true;
-     else
-         return false;
- }
+{
+    BRepClass3d_SolidClassifier aSC(aFace);
+    aSC.Perform(P,Precision::Confusion());  //设置容差
+    TopAbs_State aState = aSC.State();
+    if(aState == TopAbs_ON)
+        return true;
+    else
+        return false;
+}
 bool GeneralTools::CompareCylinderForGroove(gp_Cylinder cylind1,gp_Cylinder cylind2,double & L)
- {
-     double tol = 0.0001;
-     if(abs(cylind1.Radius() - cylind2.Radius())<=tol)
-     {
-         gp_Lin lin(cylind1.Location(),cylind1.Axis().Direction());
-         Handle(Geom_Line) gline = new Geom_Line(lin);
-         GeomAPI_ProjectPointOnCurve PPC (cylind2.Location(),gline);
-         L = PPC.LowerDistance();
-         if(L<=tol)
-             return false;
-         if (cylind1.Axis().Direction().IsParallel(cylind2.Axis().Direction(),tol))
-             return true;
-         else
-             return false;
-     }
-     return false;
- }
+{
+    double tol = 0.0001;
+    if(abs(cylind1.Radius() - cylind2.Radius())<=tol)
+    {
+        gp_Lin lin(cylind1.Location(),cylind1.Axis().Direction());
+        Handle(Geom_Line) gline = new Geom_Line(lin);
+        GeomAPI_ProjectPointOnCurve PPC (cylind2.Location(),gline);
+        L = PPC.LowerDistance();
+        if(L<=tol)
+            return false;
+        if (cylind1.Axis().Direction().IsParallel(cylind2.Axis().Direction(),tol))
+            return true;
+        else
+            return false;
+    }
+    return false;
+}
 bool GeneralTools::JudgeShapePlane(TopoDS_Shape aface,Standard_Real Tot,gp_Pln &pln)
 {
     list<gp_Pnt> Pts = DiscreteShapeToPoints( aface,false);
@@ -905,115 +904,115 @@ bool GeneralTools::FitEllips(list<gp_Pnt> pts,gp_Elips& aElips)
         x3y1 += xi*xi*xi*yi;
         xxx3 += xi*xi*xi;
     }
-        long double matrix[5][5]={{x2y2,x1y3,x2y1,x1y2,x1y1},
-                                  {x1y3,yyy4,x1y2,yyy3,yyy2},
-                                  {x2y1,x1y2,xxx2,x1y1,xxx1},
-                                  {x1y2,yyy3,x1y1,yyy2,yyy1},
-                                  {x1y1,yyy2,xxx1,yyy1,N}
-                                 };
+    long double matrix[5][5]={{x2y2,x1y3,x2y1,x1y2,x1y1},
+                              {x1y3,yyy4,x1y2,yyy3,yyy2},
+                              {x2y1,x1y2,xxx2,x1y1,xxx1},
+                              {x1y2,yyy3,x1y1,yyy2,yyy1},
+                              {x1y1,yyy2,xxx1,yyy1,N}
+                             };
 
-        long double matrix2[5][1]={x3y1,x2y2,xxx3,x2y1,xxx2};
-        long double matrix3[5][1] = {A,B,C,D,E};
+    long double matrix2[5][1]={x3y1,x2y2,xxx3,x2y1,xxx2};
+    long double matrix3[5][1] = {A,B,C,D,E};
 
-        ////求矩阵matrix的逆，结果为InverseMatrix
-        ///单位矩阵
-        int n = 5;
-        long double E_Matrix[5][5];
-        long double mik;
-        long double m = 2*n;
-        for(int i = 0; i < n; i++)
+    ////求矩阵matrix的逆，结果为InverseMatrix
+    ///单位矩阵
+    int n = 5;
+    long double E_Matrix[5][5];
+    long double mik;
+    long double m = 2*n;
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
         {
-            for(int j = 0; j < n; j++)
-            {
-                if(i == j)
-                    E_Matrix[i][j] = 1.00;
-                else
-                    E_Matrix[i][j] = 0.00;
-            }
+            if(i == j)
+                E_Matrix[i][j] = 1.00;
+            else
+                E_Matrix[i][j] = 0.00;
         }
-        long double CalcuMatrix[5][2*5];
-        for(int i = 0; i < n; i++)
+    }
+    long double CalcuMatrix[5][2*5];
+    for(int i = 0; i < n; i++)
+    {
+        for(int j = 0; j < n; j++)
         {
-            for(int j = 0; j < n; j++)
-            {
-                CalcuMatrix[i][j] = matrix[i][j];
-            }
-            for(int k = n; k < m; k++)
-            {
-                CalcuMatrix[i][k] = E_Matrix[i][k-n];
-            }
+            CalcuMatrix[i][j] = matrix[i][j];
         }
+        for(int k = n; k < m; k++)
+        {
+            CalcuMatrix[i][k] = E_Matrix[i][k-n];
+        }
+    }
 
-        for(int i = 1; i <= n-1; i++)
+    for(int i = 1; i <= n-1; i++)
+    {
+        for(int j = i+1; j <= n; j++)
         {
-            for(int j = i+1; j <= n; j++)
+            mik = CalcuMatrix[j-1][i-1]/CalcuMatrix[i-1][i-1];
+            for(int k = i+1;k <= m; k++)
             {
-                mik = CalcuMatrix[j-1][i-1]/CalcuMatrix[i-1][i-1];
-                for(int k = i+1;k <= m; k++)
-                {
-                    CalcuMatrix[j-1][k-1] -= mik*CalcuMatrix[i-1][k-1];
-                }
+                CalcuMatrix[j-1][k-1] -= mik*CalcuMatrix[i-1][k-1];
             }
         }
-        for(int i=1;i<=n;i++)
+    }
+    for(int i=1;i<=n;i++)
+    {
+        long double temp = CalcuMatrix[i-1][i-1];
+        for(int j=1;j<=m;j++)
         {
-            long double temp = CalcuMatrix[i-1][i-1];
-            for(int j=1;j<=m;j++)
+            CalcuMatrix[i-1][j-1] = CalcuMatrix[i-1][j-1]/temp;
+        }
+    }
+    for(int k=n-1;k>=1;k--)
+    {
+        for(int i=k;i>=1;i--)
+        {
+            mik = CalcuMatrix[i-1][k];
+            for(int j=k+1;j<=m;j++)
             {
-                CalcuMatrix[i-1][j-1] = CalcuMatrix[i-1][j-1]/temp;
+                CalcuMatrix[i-1][j-1] -= mik*CalcuMatrix[k][j-1];
             }
         }
-        for(int k=n-1;k>=1;k--)
+    }
+    long double InverseMatrix[5][5];
+    for(int i=0;i<n;i++)
+    {
+        for(int j=0;j<n;j++)
         {
-            for(int i=k;i>=1;i--)
-            {
-                mik = CalcuMatrix[i-1][k];
-                for(int j=k+1;j<=m;j++)
-                {
-                    CalcuMatrix[i-1][j-1] -= mik*CalcuMatrix[k][j-1];
-                }
-            }
+            InverseMatrix[i][j] = CalcuMatrix[i][j+n];
         }
-        long double InverseMatrix[5][5];
-        for(int i=0;i<n;i++)
+    }
+    for(int i=0;i<5;i++)
+    {
+        for(int j=0;j<5;j++)
         {
-            for(int j=0;j<n;j++)
-            {
-                InverseMatrix[i][j] = CalcuMatrix[i][j+n];
-            }
+            if(fabs(InverseMatrix[i][j]) < 0.0000001)
+                InverseMatrix[i][j] = 0.00;
         }
-        for(int i=0;i<5;i++)
+    }
+    ///求参数A,B,C,D,E
+    for(int i=0;i<5;i++)
+    {
+        for(int j=0;j<5;j++)
         {
-            for(int j=0;j<5;j++)
-            {
-                if(fabs(InverseMatrix[i][j]) < 0.0000001)
-                    InverseMatrix[i][j] = 0.00;
-            }
+            matrix3[i][0] += InverseMatrix[i][j]*(-matrix2[j][0]);
         }
-        ///求参数A,B,C,D,E
-        for(int i=0;i<5;i++)
-        {
-            for(int j=0;j<5;j++)
-            {
-                matrix3[i][0] += InverseMatrix[i][j]*(-matrix2[j][0]);
-            }
-        }
-        A = matrix3[0][0];
-        B = matrix3[1][0];
-        C = matrix3[2][0];
-        D = matrix3[3][0];
-        E = matrix3[4][0];
-        ///求拟合结果重要参数
-        double Xc = (2*B*C-A*D)/(A*A-4*B);
-        double Yc = (2*D-A*D)/(A*A-4*B);
-        double a = sqrt(fabs(2*(A*C*D-B*C*C-D*D+4*B*E-A*A*E)/((A*A-4*B)*(B-sqrt(A*A+(1-B)*(1-B))+1))));
-        double b = sqrt(fabs(2*(A*C*D-B*C*C-D*D+4*B*E-A*A*E)/((A*A-4*B)*(B+sqrt(A*A+(1-B)*(1-B))+1))));
-        double theta = atan2(a*a-b*b*B,a*a*B-b*b);
-        gp_Pnt centerP = TranslatePnt2dToPnt(gp_Pnt2d(Xc,Yc),coordAx);
-        coordAx.Translate(acenter,centerP);
-        gp_Ax2 otherAx = coordAx.Rotated(coordAx.Axis(),theta);
-        gp_Elips aElips1(otherAx,a>b?a:b,a>b?b:a);
-        aElips = aElips1;
+    }
+    A = matrix3[0][0];
+    B = matrix3[1][0];
+    C = matrix3[2][0];
+    D = matrix3[3][0];
+    E = matrix3[4][0];
+    ///求拟合结果重要参数
+    double Xc = (2*B*C-A*D)/(A*A-4*B);
+    double Yc = (2*D-A*D)/(A*A-4*B);
+    double a = sqrt(fabs(2*(A*C*D-B*C*C-D*D+4*B*E-A*A*E)/((A*A-4*B)*(B-sqrt(A*A+(1-B)*(1-B))+1))));
+    double b = sqrt(fabs(2*(A*C*D-B*C*C-D*D+4*B*E-A*A*E)/((A*A-4*B)*(B+sqrt(A*A+(1-B)*(1-B))+1))));
+    double theta = atan2(a*a-b*b*B,a*a*B-b*b);
+    gp_Pnt centerP = TranslatePnt2dToPnt(gp_Pnt2d(Xc,Yc),coordAx);
+    coordAx.Translate(acenter,centerP);
+    gp_Ax2 otherAx = coordAx.Rotated(coordAx.Axis(),theta);
+    gp_Elips aElips1(otherAx,a>b?a:b,a>b?b:a);
+    aElips = aElips1;
     return true;
 }
 /// <summary>
@@ -1378,7 +1377,7 @@ bool GeneralTools::GetPlane(TopoDS_Shape shape,gp_Pln &aPlane)
 {
     TopoDS_Face aface;
     if(shape.ShapeType() == TopAbs_ShapeEnum::TopAbs_FACE)
-         aface= TopoDS::Face(shape);
+        aface= TopoDS::Face(shape);
     else if(shape.ShapeType() == TopAbs_ShapeEnum::TopAbs_SHELL)
     {
         TopExp_Explorer Ex;
@@ -1426,7 +1425,7 @@ bool GeneralTools::GetEllips(Handle(Geom_Curve) anEdgeCurve,gp_Elips& aElips)
         }
         if(FitEllips(pts,aElips))
         {
-           return true;
+            return true;
         }
     }
     return false;
@@ -1435,7 +1434,7 @@ bool GeneralTools::GetSphere(TopoDS_Shape shape,list<gp_Pnt> Pts,gp_Sphere& sphe
 {
     TopoDS_Face aface;
     if(shape.ShapeType() == TopAbs_ShapeEnum::TopAbs_FACE)
-         aface= TopoDS::Face(shape);
+        aface= TopoDS::Face(shape);
     else if(shape.ShapeType() == TopAbs_ShapeEnum::TopAbs_SHELL)
     {
         TopExp_Explorer Ex;

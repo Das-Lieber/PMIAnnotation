@@ -212,9 +212,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 1:
     {
         setCharEnable({true,true,true,
-                      true,true,true,
-                      true,false,false,
-                      true});
+                       true,true,true,
+                       true,false,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -233,9 +233,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 2:
     {
         setCharEnable({true,true,false,
-                      false,false,true,
-                      true,true,false,
-                      true});
+                       false,false,true,
+                       true,true,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -254,9 +254,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 3:
     {
         setCharEnable({false,true,false,
-                      false,false,true,
-                      true,false,false,
-                      true});
+                       false,false,true,
+                       true,false,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -275,9 +275,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 4:
     {
         setCharEnable({false,false,false,
-                      false,false,false,
-                      true,false,false,
-                      false});
+                       false,false,false,
+                       true,false,false,
+                       false});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -296,9 +296,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 5:
     {
         setCharEnable({false,true,true,
-                      true,true,true,
-                      true,false,true,
-                      true});
+                       true,true,true,
+                       true,false,true,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -317,9 +317,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 6:
     {
         setCharEnable({false,true,true,
-                      true,true,true,
-                      true,true,true,
-                      true});
+                       true,true,true,
+                       true,true,true,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -338,9 +338,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 7:
     {
         setCharEnable({true,true,true,
-                      true,true,true,
-                      true,true,false,
-                      true});
+                       true,true,true,
+                       true,true,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -359,9 +359,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 8:
     {
         setCharEnable({true,true,true,
-                      true,true,true,
-                      true,true,false,
-                      true});
+                       true,true,true,
+                       true,true,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -380,9 +380,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 9:
     {
         setCharEnable({true,true,true,
-                      true,true,true,
-                      true,true,false,
-                      true});
+                       true,true,true,
+                       true,true,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -401,9 +401,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 10:
     {
         setCharEnable({false,false,false,
-                      false,false,false,
-                      true,false,false,
-                      false});
+                       false,false,false,
+                       true,false,false,
+                       false});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -422,9 +422,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 11:
     {
         setCharEnable({false,false,false,
-                      false,false,false,
-                      true,false,false,
-                      false});
+                       false,false,false,
+                       true,false,false,
+                       false});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -443,9 +443,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 12:
     {
         setCharEnable({true,true,true,
-                      true,true,true,
-                      true,false,false,
-                      true});
+                       true,true,true,
+                       true,false,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -464,9 +464,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 13:
     {
         setCharEnable({true,true,true,
-                      true,false,false,
-                      true,false,false,
-                      true});
+                       true,false,false,
+                       true,false,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -485,9 +485,9 @@ void ToleranceInput::on_comboBox_symbol_currentIndexChanged(int index)
     case 14:
     {
         setCharEnable({false,true,true,
-                      true,false,false,
-                      true,false,false,
-                      true});
+                       true,false,false,
+                       true,false,false,
+                       true});
 
         ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
         ui->checkBox_Tol2->setEnabled(true);
@@ -860,9 +860,9 @@ void ToleranceInput::initEnableState()
 {
     // 1.公差用到的10个符号
     setCharEnable({false,false,false,
-                  false,false,false,
-                  false,false,false,
-                  false});
+                   false,false,false,
+                   false,false,false,
+                   false});
 
     // 2.公差2的勾选框
     ui->checkBox_Tol2->setCheckState(Qt::Unchecked);
@@ -1010,7 +1010,7 @@ NCollection_Utf8String ToleranceInput::nstrFromTolState(const TolEditState &stat
         << FONT_Free << FONT_PTZ+panV << FONT_Square << FONT_UAC << FONT_Pan;
     //the radius first
     if(state.checked[0])
-        result += list[0];    
+        result += list[0];
 
     // 2.tolerance value
     result += state.tolVal.toStdString().data();

@@ -60,27 +60,27 @@ void DiamensionInput::on_pushButton_sure_clicked()
     }
 
     
-	
-	QString subStr = ui->lineEdit_lowVal->text();
-	QString supStr = ui->lineEdit_upVal->text();
-	
+
+    QString subStr = ui->lineEdit_lowVal->text();
+    QString supStr = ui->lineEdit_upVal->text();
+
     if(subStr.toDouble() > 0 && !subStr.contains('+')) {
         subStr.prepend('+');
-	}
+    }
     if(supStr.toDouble() > 0 && !supStr.contains('+')) {
         supStr.prepend('+');
-	}
+    }
 
-	mainVal = ui->lineEdit_mainVal->text().toStdString().data();
-	upVal = supStr.toStdString().data();
+    mainVal = ui->lineEdit_mainVal->text().toStdString().data();
+    upVal = supStr.toStdString().data();
     lowVal = subStr.toStdString().data();
-	
+
     if(mainVal.IsEmpty()) {
         QMessageBox::critical(this,"错误","未输入主尺寸!");
         return;
     }
 
-    emit labelEditFinish({mainVal,upVal,lowVal},
+    emit labelEditFinish({diaType+mainVal,upVal,lowVal},
                          myBindShape1, myBindShape2,
                          myTouch1, myTouch2,
                          myPlace, diamensionType);
@@ -595,25 +595,33 @@ void DiamensionInput::on_comboBox_measureType_currentIndexChanged(int index)
 {
     diamensionType = index;
     switch(index)
-        {
-        case 0:{
-            ui->stackedWidget_element->setCurrentIndex(0);
-            ui->stackedWidget_reference->setCurrentIndex(1);
-        }break;
-        case 1:
-        case 2:{
-            ui->stackedWidget_element->setCurrentIndex(1);
-            ui->stackedWidget_reference->setCurrentIndex(0);
-        }break;
-        case 3:
-        case 4:{
-            ui->stackedWidget_element->setCurrentIndex(0);
-            ui->stackedWidget_reference->setCurrentIndex(0);
-        }break;
-        case 5:{
-            ui->stackedWidget_element->setCurrentIndex(0);
-            ui->stackedWidget_reference->setCurrentIndex(0);
-        }break;
-        }
+    {
+    case 0:{
+        ui->stackedWidget_element->setCurrentIndex(0);
+        ui->stackedWidget_reference->setCurrentIndex(1);
+        diaType = "";
+    }break;
+    case 1:
+    case 2:{
+        ui->stackedWidget_element->setCurrentIndex(1);
+        ui->stackedWidget_reference->setCurrentIndex(0);
+        diaType = "";
+    }break;
+    case 3:{
+        ui->stackedWidget_element->setCurrentIndex(0);
+        ui->stackedWidget_reference->setCurrentIndex(0);
+        diaType = FONT_Radius;
+    }break;
+    case 4:{
+        ui->stackedWidget_element->setCurrentIndex(0);
+        ui->stackedWidget_reference->setCurrentIndex(0);
+        diaType = "R";
+    }break;
+    case 5:{
+        ui->stackedWidget_element->setCurrentIndex(0);
+        ui->stackedWidget_reference->setCurrentIndex(0);
+        diaType = "";
+    }break;
+    }
 }
 

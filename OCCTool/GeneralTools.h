@@ -1,5 +1,4 @@
-﻿
-#pragma once
+﻿#pragma once
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_TrimmedCurve.hxx>
@@ -19,7 +18,7 @@
 #include <map>
 #include <vector>
 using namespace std;
- class GeneralTools
+class GeneralTools
 {
 public:
     GeneralTools(void);
@@ -65,7 +64,7 @@ public:
     static bool GetPlane(TopoDS_Shape shape,gp_Pln &aPlane);
     static bool GetCylinder(Handle(Geom_Surface) aSurface,gp_Cylinder& cylind);
     static bool GetCicle(Handle(Geom_Curve) aCurve,gp_Circ& cir);
-    static bool GetCone(Handle(Geom_Surface) aSurface,gp_Cone& aCone);   
+    static bool GetCone(Handle(Geom_Surface) aSurface,gp_Cone& aCone);
     static bool GetEllips(Handle(Geom_Curve) anEdgeCurve,gp_Elips& aElips);
     static bool GetSphere(TopoDS_Shape shape,list<gp_Pnt> Pts,gp_Sphere& sphere);
     static bool GetAxis(const Handle(Geom_Surface)& aSurface, gp_Ax1& ax);

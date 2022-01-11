@@ -21,8 +21,6 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <PrsDim_RadiusDimension.hxx>
-#include <PrsDim_DiameterDimension.hxx>
 #include <PrsDim_AngleDimension.hxx>
 #include <TopExp.hxx>
 #include <GC_MakePlane.hxx>
@@ -33,6 +31,8 @@
 #include "Label/Label_Tolerance.h"
 #include "Label/Label_Datum.h"
 #include "Label/Label_Length.h"
+#include "Label/Label_Radius.h"
+#include "Label/Label_Diameter.h"
 #include "OCCTool/PMIModel.h"
 #include "OCCTool/GeneralTools.h"
 
@@ -382,7 +382,7 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
         //距离
     case 1:{
         measureLength(box, valList, shape1, shape2);
-        break;
+        return;
     }
         //角度
     case 2:{
@@ -502,8 +502,19 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             double a,b;
             Handle(Geom_Curve) gc =bpt.Curve(TopoDS::Edge(shape1),a,b);
             gp_Circ circle;
-            if(GeneralTools::GetCicle(gc,circle))
-                label = new PrsDim_DiameterDimension(circle);
+            if(GeneralTools::GetCicle(gc,circle)) {
+                gp_Dir direc = touch1.XYZ() - circle.Location().XYZ();
+                gp_Pnt target = targetWithBox(touch1, direc, box);
+                gp_Ax2 oriention(target, circle.Axis().Direction(), direc);
+                // 偏移避免遮挡
+                gp_Dir pan = circle.Axis().Direction();
+                circle.Translate(0.01*pan);
+                oriention.Translate(0.01*pan);
+
+                Handle(Label_Diameter) aLabel = new Label_Diameter(valList, circle, oriention);
+                occWidget->GetContext()->Display(aLabel, true);
+                return;
+            }
         }
         break;
     }
@@ -514,8 +525,19 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             double a,b;
             Handle(Geom_Curve) gc =bpt.Curve(TopoDS::Edge(shape1),a,b);
             gp_Circ circle;
-            if(GeneralTools::GetCicle(gc,circle))
-                label = new PrsDim_RadiusDimension(circle);
+            if(GeneralTools::GetCicle(gc,circle)) {
+                gp_Dir direc = touch1.XYZ() - circle.Location().XYZ();
+                gp_Pnt target = targetWithBox(touch1, direc, box);
+                gp_Ax2 oriention(target, circle.Axis().Direction(), direc);
+                // 偏移避免遮挡
+                gp_Dir pan = circle.Axis().Direction();
+                circle.Translate(0.01*pan);
+                oriention.Translate(0.01*pan);
+
+                Handle(Label_Radius) aLabel = new Label_Radius(valList, circle, oriention);
+                occWidget->GetContext()->Display(aLabel, true);
+                return;
+            }
         }
         break;
     }

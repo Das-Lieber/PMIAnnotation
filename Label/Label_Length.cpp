@@ -1,4 +1,4 @@
-﻿ #include "Label_Length.h"
+﻿#include "Label_Length.h"
 
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <Font_BRepTextBuilder.hxx>
@@ -49,8 +49,8 @@ void Label_Length::SetLocation(const gp_Pnt &pnt)
 }
 
 void Label_Length::Compute (const Handle(PrsMgr_PresentationManager3d)& /*thePrsMgr*/,
-                               const Handle(Prs3d_Presentation)& thePrs,
-                               const Standard_Integer theMode)
+                            const Handle(Prs3d_Presentation)& thePrs,
+                            const Standard_Integer theMode)
 {
     switch (theMode)
     {
@@ -99,7 +99,7 @@ void Label_Length::Compute (const Handle(PrsMgr_PresentationManager3d)& /*thePrs
 }
 
 void Label_Length::ComputeSelection (const Handle(SelectMgr_Selection)& theSelection,
-                                        const Standard_Integer             theMode)
+                                     const Standard_Integer             theMode)
 {
     switch (theMode)
     {

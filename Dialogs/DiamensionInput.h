@@ -40,6 +40,7 @@ private:
 
     int diamensionType = 0;
 
+    NCollection_Utf8String diaType;
     NCollection_Utf8String mainVal;
     NCollection_Utf8String upVal;
     NCollection_Utf8String lowVal;

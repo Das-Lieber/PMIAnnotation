@@ -17,8 +17,10 @@ HEADERS += \
     Dialogs/TolBaseInput.h \
     Dialogs/ToleranceInput.h \
     Label/Label_Datum.h \
+    Label/Label_Diameter.h \
     Label/Label_Length.h \
     Label/Label_PMI.h \
+    Label/Label_Radius.h \
     Label/Label_Tolerance.h \
     MainWindow.h \
     OCCTool/AIS_DraftPoint.h \
@@ -35,8 +37,10 @@ SOURCES += \
     Dialogs/TolBaseInput.cpp \
     Dialogs/ToleranceInput.cpp \
     Label/Label_Datum.cpp \
+    Label/Label_Diameter.cpp \
     Label/Label_Length.cpp \
     Label/Label_PMI.cpp \
+    Label/Label_Radius.cpp \
     Label/Label_Tolerance.cpp \
     MainWindow.cpp \
     OCCTool/AIS_DraftPoint.cpp \

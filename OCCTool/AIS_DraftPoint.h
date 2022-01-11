@@ -7,7 +7,7 @@
 
 class AIS_DraftPoint : public QObject, public AIS_DraftShape
 {
- Q_OBJECT
+    Q_OBJECT
 
 public:
     AIS_DraftPoint(const gp_Pnt& p, const gp_Pln& pln);
@@ -49,18 +49,18 @@ signals:
 
 protected:
 
-  Standard_EXPORT virtual void Compute (const Handle(PrsMgr_PresentationManager3d)& aPresentationManager, const Handle(Prs3d_Presentation)& aPresentation, const Standard_Integer aMode = 0) Standard_OVERRIDE;
+    Standard_EXPORT virtual void Compute (const Handle(PrsMgr_PresentationManager3d)& aPresentationManager, const Handle(Prs3d_Presentation)& aPresentation, const Standard_Integer aMode = 0) Standard_OVERRIDE;
 
 private:
 
-  Standard_EXPORT void ComputeSelection (const Handle(SelectMgr_Selection)& aSelection, const Standard_Integer aMode) Standard_OVERRIDE;
+    Standard_EXPORT void ComputeSelection (const Handle(SelectMgr_Selection)& aSelection, const Standard_Integer aMode) Standard_OVERRIDE;
 
 public:
 
     //! CASCADE RTTI
-  DEFINE_STANDARD_RTTIEXT(AIS_DraftPoint,AIS_DraftShape)
-  bool getMyEditable() const;
-  void setMyEditable(bool newMyEditable);
+    DEFINE_STANDARD_RTTIEXT(AIS_DraftPoint,AIS_DraftShape)
+    bool getMyEditable() const;
+    void setMyEditable(bool newMyEditable);
 };
 
 DEFINE_STANDARD_HANDLE(AIS_DraftPoint, AIS_DraftShape)
