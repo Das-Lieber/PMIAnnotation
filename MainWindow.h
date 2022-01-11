@@ -56,6 +56,8 @@ private:
     bool requestPointOnPlane = false;
 
     gp_Pnt targetWithBox(const gp_Pnt& input, const gp_Dir& dir, const Bnd_Box& box);
+    void measureLength(const Bnd_Box& box, const QList<NCollection_Utf8String> &valList,
+                       const TopoDS_Shape &shape1, const TopoDS_Shape &shape2);
     void dimensionOfTwoAxis(const Bnd_Box& box, const gp_Ax1& ax1, const gp_Ax1& ax2,
                             gp_Pnt& first, gp_Pnt& second, gp_Ax2& oriention);
 

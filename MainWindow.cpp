@@ -17,13 +17,13 @@
 #include <TopoDS.hxx>
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopExp_Explorer.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <PrsDim_RadiusDimension.hxx>
 #include <PrsDim_DiameterDimension.hxx>
 #include <PrsDim_AngleDimension.hxx>
-#include <PrsDim_LengthDimension.hxx>
 #include <TopExp.hxx>
 #include <GC_MakePlane.hxx>
 
@@ -376,360 +376,12 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
             occWidget->GetContext()->Display(aLabel, Standard_True);
             return;
-//            label = new PrsDim_LengthDimension(p1,p2,gp_Pln(p1,place.Axis().Direction()));
         }
         break;
     }
         //距离
     case 1:{
-        if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_FACE) {
-            Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape1));
-            Handle(Geom_Surface) face2 = BRep_Tool::Surface(TopoDS::Face(shape2));
-
-            gp_Ax1 axis1, axis2;
-            gp_Pln pln1, pln2;
-            bool reta1 = GeneralTools::GetAxis(face1,axis1);
-            bool reta2 = GeneralTools::GetAxis(face2,axis2);
-            bool retb1 = GeneralTools::GetPlane(shape1,pln1);
-            bool retb2 = GeneralTools::GetPlane(shape2,pln2);
-
-            //两个旋转面
-            if(reta1 && reta2) {
-                if(!axis1.IsParallel(axis2, 1e-6)) {
-                    QMessageBox::critical(this,"错误","两面不平行!");
-                    return;
-                }
-
-                if(gp_Lin(axis1).Distance(gp_Lin(axis2)) < 1e-6) {
-                    QMessageBox::critical(this,"错误","两转轴重合!");
-                    return;
-                }
-
-                if(!axis1.IsParallel(axis2, 1e-6)) {
-                    QMessageBox::critical(this,"错误","两转不平行!");
-                    return;
-                }
-
-                gp_Pnt p1 ,p2;gp_Ax2 oriention;
-                dimensionOfTwoAxis(box, axis1, axis2, p1, p2, oriention);
-                Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
-                occWidget->GetContext()->Display(aLabel, Standard_True);
-                return;
-//                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
-            }
-            //两个平面
-            else if(retb1 && retb2){
-                if(pln1.Distance(pln2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","两面不平行!");
-                    return;
-                }
-
-                label = new PrsDim_LengthDimension(TopoDS::Face(shape1), TopoDS::Face(shape2));
-            }
-            //1是旋转面，2是平面
-            else if(reta1 && retb2) {
-                if(pln2.Distance(gp_Lin(axis1)) < 1e-6) {
-                    QMessageBox::critical(this,"错误","平面与转轴重合!");
-                    return;
-                }
-
-                if(!pln2.Axis().IsNormal(axis1, 1e-6)) {
-                    QMessageBox::critical(this,"错误","平面与转轴不平行!");
-                    return;
-                }
-
-                BRep_Builder abuilder;
-                TopoDS_Edge edge;
-                Handle(Geom_Line) line = new Geom_Line(gp_Lin(axis1));
-                abuilder.MakeEdge(edge,line,1e-6);
-                label = new PrsDim_LengthDimension(TopoDS::Face(shape2), edge);
-            }
-            //1是平面2是旋转面
-            else if(reta2 && retb1){
-                if(pln1.Distance(gp_Lin(axis2)) < 1e-6) {
-                    QMessageBox::critical(this,"错误","平面与转轴重合!");
-                    return;
-                }
-
-                if(!pln1.Axis().IsNormal(axis2, 1e-6)) {
-                    QMessageBox::critical(this,"错误","平面与转轴不平行!");
-                    return;
-                }
-
-                BRep_Builder abuilder;
-                TopoDS_Edge edge;
-                Handle(Geom_Line) line = new Geom_Line(gp_Lin(axis2));
-                abuilder.MakeEdge(edge,line,1e-6);
-                label = new PrsDim_LengthDimension(TopoDS::Face(shape1), edge);
-            }
-        }
-        else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_EDGE) {
-            Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape1));
-            double a,b;
-            Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape2),a,b);
-
-            gp_Ax1 axis1;gp_Pln pln1;
-            gp_Lin lin2;gp_Ax2 ax2;
-            bool reta1 = GeneralTools::GetAxis(face1,axis1);
-            bool reta2 = GeneralTools::GetLine(curve2,lin2);
-            bool retb1 = GeneralTools::GetPlane(shape1,pln1);
-            bool retb2 = GeneralTools::GetCenter(curve2,ax2);
-            //平面和直线
-            if(retb1 && reta2) {
-                if(pln1.Distance(lin2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线在平面上!");
-                    return;
-                }
-
-                if(!pln1.Axis().IsNormal(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线不与平面垂直!");
-                    return;
-                }
-
-                label = new PrsDim_LengthDimension(TopoDS::Face(shape1), TopoDS::Edge(shape2));
-            }
-            //平面和圆弧
-            else if(retb1 && retb2) {
-                if(!pln1.Axis().IsNormal(ax2.Axis(), 1e-6) && !pln1.Axis().IsParallel(ax2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","平面与转轴不平行!");
-                    return;
-                }
-
-                Handle(Geom_Plane) surface = new Geom_Plane(pln1);
-                GeomAPI_ProjectPointOnSurf PPOS(ax2.Location(),surface);
-                gp_Pnt p1 = PPOS.NearestPoint();
-                gp_Pnt p2;
-                curve2->D0(a,p2);
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,p2,ax2.Location());
-                label = new PrsDim_LengthDimension(p1, ax2.Location(), plane->Pln());
-            }
-            //旋转面和直线
-            else if(reta1 && reta2) {
-                if(gp_Lin(axis1).Distance(lin2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                if(!axis1.IsParallel(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt p1 ,p2;gp_Ax2 oriention;
-                dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
-                Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
-                occWidget->GetContext()->Display(aLabel, Standard_True);
-                return;
-            }
-            //旋转面和圆弧
-            else if(reta1 && retb2) {
-                if(gp_Lin(axis1).Distance(gp_Lin(ax2.Axis())) < 1e-6) {
-                    QMessageBox::critical(this,"错误","面转轴与弧转轴重合!");
-                    return;
-                }
-
-                if(!axis1.IsParallel(ax2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","面转轴与弧转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt p1 = axis1.Location();
-                gp_Pnt p2 = ax2.Location();
-                gp_Dir pp(p2.XYZ()-p1.XYZ());
-                gp_Dir dir = ax2.Direction();
-                gp_Dir normal = dir.Crossed(pp);
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,normal);
-                Handle(Geom_Line) line = new Geom_Line(gp_Lin(axis1));
-                GeomAPI_ProjectPointOnCurve PPC(p2,line);
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(p2, p5, plane->Pln());
-            }
-        }
-        else if(shape2.ShapeType() == TopAbs_FACE && shape1.ShapeType() == TopAbs_EDGE) {
-            Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape2));
-            double a,b;
-            Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
-
-            gp_Ax1 axis1;gp_Pln pln1;
-            gp_Lin lin2;gp_Ax2 ax2;
-            bool reta1 = GeneralTools::GetAxis(face1,axis1);
-            bool reta2 = GeneralTools::GetLine(curve2,lin2);
-            bool retb1 = GeneralTools::GetPlane(shape2,pln1);
-            bool retb2 = GeneralTools::GetCenter(curve2,ax2);
-            //平面和直线
-            if(retb1 && reta2) {
-                if(pln1.Distance(lin2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线在平面上!");
-                    return;
-                }
-
-                if(!pln1.Axis().IsNormal(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线不与平面垂直!");
-                    return;
-                }
-
-                label = new PrsDim_LengthDimension(TopoDS::Face(shape2), TopoDS::Edge(shape1));
-            }
-            //平面和圆弧
-            else if(retb1 && retb2) {
-                if(!pln1.Axis().IsNormal(ax2.Axis(), 1e-6) && !pln1.Axis().IsParallel(ax2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","平面与圆弧不平行!");
-                    return;
-                }
-
-                Handle(Geom_Plane) surface = new Geom_Plane(pln1);
-                GeomAPI_ProjectPointOnSurf PPOS(ax2.Location(),surface);
-                gp_Pnt p1 = PPOS.NearestPoint();
-                gp_Pnt p2;
-                curve2->D0(a,p2);
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,p2,ax2.Location());
-                label = new PrsDim_LengthDimension(p1, ax2.Location(), plane->Pln());
-            }
-            //旋转面和直线
-            else if(reta1 && reta2) {
-                if(gp_Lin(axis1).Distance(lin2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                if(!axis1.IsParallel(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt p1 = axis1.Location();
-                gp_Pnt p2 = lin2.Location();
-                gp_Dir pp(p2.XYZ()-p1.XYZ());
-                gp_Dir c2 = lin2.Direction();
-                gp_Dir normal = c2.Crossed(pp);
-                //转轴所在平面
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,normal);
-                Handle(Geom_Line) line = new Geom_Line(lin2);
-                GeomAPI_ProjectPointOnCurve PPC(p1,line);
-                // p1在第二个轴上的最近点
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
-            }
-            //旋转面和圆弧
-            else if(reta1 && retb2) {
-                if(gp_Lin(axis1).Distance(gp_Lin(ax2.Location(),ax2.Direction())) < 1e-6) {
-                    QMessageBox::critical(this,"错误","面转轴与圆弧转轴不平行!");
-                    return;
-                }
-
-                if(!axis1.IsParallel(ax2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","面转轴与弧转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt p1 = axis1.Location();
-                gp_Pnt p2 = ax2.Location();
-                gp_Dir pp(p2.XYZ()-p1.XYZ());
-                gp_Dir dir = ax2.Direction();
-                gp_Dir normal = dir.Crossed(pp);
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,normal);
-                Handle(Geom_Line) line = new Geom_Line(gp_Lin(axis1));
-                GeomAPI_ProjectPointOnCurve PPC(p2,line);
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(p2, p5, plane->Pln());
-            }
-        }
-        else if(shape1.ShapeType() == TopAbs_EDGE && shape2.ShapeType() == TopAbs_EDGE) {
-            double a,b,c,d;
-            Handle(Geom_Curve) curve1 = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
-            Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape2),c,d);
-            gp_Pnt p1,p2,p3,p4;
-            curve1->D0(a,p1);curve1->D0(b,p2);curve2->D0(c,p3);curve2->D0(d,p4);
-
-            gp_Ax2 axis1, axis2;
-            gp_Lin lin1, lin2;
-            bool ret1 = GeneralTools::GetLine(curve1,lin1);
-            bool ret2 = GeneralTools::GetLine(curve2,lin2);
-            bool ret3 = GeneralTools::GetCenter(curve1,axis1);
-            bool ret4 = GeneralTools::GetCenter(curve2,axis2);
-
-            // 两条线段
-            if(ret1 && ret2) {
-                if(lin1.Distance(lin2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","两直线相交!");
-                    return;
-                }
-
-                if(!lin1.Position().IsParallel(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","两直线不平行!");
-                    return;
-                }
-
-                Handle(Geom_Line) midCurve = new Geom_Line(gp_Lin(p3,gp_Dir(p4.XYZ()-p3.XYZ())));
-                GeomAPI_ProjectPointOnCurve PPC(p1,midCurve);
-                gp_Pnt p5 = PPC.NearestPoint();
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,p2,p5);
-                label = new PrsDim_LengthDimension(p1, p5, plane->Pln());
-            }
-            //1线段2圆弧
-            else if(ret1 && ret4) {
-                if(lin1.Distance(gp_Lin(axis2.Axis())) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                if(!lin1.Position().IsParallel(axis2.Axis(), 1e-6) && !lin1.Position().IsNormal(axis2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt lc = axis2.Location();
-                GeomAPI_ProjectPointOnCurve PPC(lc,curve1);
-                gp_Pnt p5 = PPC.NearestPoint();
-                Handle(Geom_Plane) plane = GC_MakePlane(p1,p2,lc);
-                label = new PrsDim_LengthDimension(lc, p5, plane->Pln());
-            }
-            //1圆弧2线段
-            else if(ret3 && ret2) {
-                if(lin2.Distance(gp_Lin(axis1.Axis())) < 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                if(!lin2.Position().IsParallel(axis1.Axis(), 1e-6) && !lin2.Position().IsNormal(axis1.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt lc = axis1.Location();
-                GeomAPI_ProjectPointOnCurve PPC(lc,curve2);
-                gp_Pnt p5 = PPC.NearestPoint();
-                Handle(Geom_Plane) plane = GC_MakePlane(p3,p4,lc);
-                label = new PrsDim_LengthDimension(lc, p5, plane->Pln());
-            }
-            //两条圆弧
-            else if(ret3 && ret4) {
-                gp_Lin lct1(axis1.Axis());
-                gp_Lin lct2(axis2.Axis());
-                if(lct1.Distance(lct2) < 1e-6) {
-                    QMessageBox::critical(this,"错误","两个转轴不平行!");
-                    return;
-                }
-
-                if(!axis1.Axis().IsParallel(axis2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","两个转轴不平行!");
-                    return;
-                }
-
-                gp_Pnt lc1 = axis1.Location();
-                gp_Pnt lc2 = axis2.Location();
-                gp_Dir pp(lc2.XYZ()-lc1.XYZ());
-                gp_Dir c2 = lct2.Direction();
-                gp_Dir normal = c2.Crossed(pp);
-                //转轴所在平面
-                Handle(Geom_Plane) plane = GC_MakePlane(lc1,normal);
-                Handle(Geom_Line) line = new Geom_Line(lct2);
-                GeomAPI_ProjectPointOnCurve PPC(lc1,line);
-                // p1在第二个轴上的最近点
-                gp_Pnt p5 = PPC.NearestPoint();
-                label = new PrsDim_LengthDimension(lc1, p5, plane->Pln());
-            }
-        }
+        measureLength(box, valList, shape1, shape2);
         break;
     }
         //角度
@@ -975,6 +627,345 @@ gp_Pnt MainWindow::targetWithBox(const gp_Pnt &input, const gp_Dir &dir, const B
 
     target = input.XYZ() + 1.2*dif*dir.XYZ();
     return target;
+}
+
+void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8String> &valList,
+                               const TopoDS_Shape &shape1, const TopoDS_Shape &shape2)
+{
+    Handle(Label_Length) aLabel;
+    if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_FACE) {
+        Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape1));
+        Handle(Geom_Surface) face2 = BRep_Tool::Surface(TopoDS::Face(shape2));
+
+        gp_Ax1 axis1, axis2;
+        gp_Pln pln1, pln2;
+        bool reta1 = GeneralTools::GetAxis(face1,axis1);
+        bool reta2 = GeneralTools::GetAxis(face2,axis2);
+        bool retb1 = GeneralTools::GetPlane(shape1,pln1);
+        bool retb2 = GeneralTools::GetPlane(shape2,pln2);
+
+        //两个旋转面
+        if(reta1 && reta2) {
+            if(!axis1.IsParallel(axis2, 1e-6)) {
+                QMessageBox::critical(this,"错误","两面不平行!");
+                return;
+            }
+
+            if(gp_Lin(axis1).Distance(gp_Lin(axis2)) < 1e-6) {
+                QMessageBox::critical(this,"错误","两转轴重合!");
+                return;
+            }
+
+            if(!axis1.IsParallel(axis2, 1e-6)) {
+                QMessageBox::critical(this,"错误","两转不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, axis2, p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //两个平面
+        else if(retb1 && retb2){
+            if(pln1.Distance(pln2) < 1e-6) {
+                QMessageBox::critical(this,"错误","两面不平行!");
+                return;
+            }
+
+            TopExp_Explorer exp;
+            exp.Init(shape1, TopAbs_EDGE);
+            Standard_Real low, up;
+            Handle(Geom_Curve) curve = BRep_Tool::Curve(TopoDS::Edge(exp.Value()), low, up);
+            gp_Pnt plnPt = curve->Value(low);
+            gp_Ax1 plnAxis1(plnPt, pln1.YAxis().Direction());
+            GeomAPI_ProjectPointOnSurf PPOS(plnPt,face2);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis2(np,plnAxis1.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis1, plnAxis2, p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //1是旋转面，2是平面
+        else if(reta1 && retb2) {
+            if(pln2.Distance(gp_Lin(axis1)) < 1e-6) {
+                QMessageBox::critical(this,"错误","平面与转轴重合!");
+                return;
+            }
+
+            if(!pln2.Axis().IsNormal(axis1, 1e-6)) {
+                QMessageBox::critical(this,"错误","平面与转轴不平行!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(axis1.Location(),face2);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,axis1.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, plnAxis, p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //1是平面2是旋转面
+        else if(reta2 && retb1){
+            if(pln1.Distance(gp_Lin(axis2)) < 1e-6) {
+                QMessageBox::critical(this,"错误","平面与转轴重合!");
+                return;
+            }
+
+            if(!pln1.Axis().IsNormal(axis2, 1e-6)) {
+                QMessageBox::critical(this,"错误","平面与转轴不平行!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(axis2.Location(),face1);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,axis2.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis, axis2, p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+    }
+    else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_EDGE) {
+        Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape1));
+        double a,b;
+        Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape2),a,b);
+
+        gp_Ax1 axis1;gp_Pln pln1;
+        gp_Lin lin2;gp_Ax2 ax2;
+        bool reta1 = GeneralTools::GetAxis(face1,axis1);
+        bool reta2 = GeneralTools::GetLine(curve2,lin2);
+        bool retb1 = GeneralTools::GetPlane(shape1,pln1);
+        bool retb2 = GeneralTools::GetCenter(curve2,ax2);
+        //平面和直线
+        if(retb1 && reta2) {
+            if(pln1.Distance(lin2) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线在平面上!");
+                return;
+            }
+
+            if(!pln1.Axis().IsNormal(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线不与平面垂直!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(lin2.Location(),face1);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,lin2.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //平面和圆弧
+        else if(retb1 && retb2) {
+            if(!pln1.Axis().IsNormal(ax2.Axis(), 1e-6) && !pln1.Axis().IsParallel(ax2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","平面与转轴不平行!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(ax2.Location(),face1);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,ax2.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //旋转面和直线
+        else if(reta1 && reta2) {
+            if(gp_Lin(axis1).Distance(lin2) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            if(!axis1.IsParallel(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //旋转面和圆弧
+        else if(reta1 && retb2) {
+            if(gp_Lin(axis1).Distance(gp_Lin(ax2.Axis())) < 1e-6) {
+                QMessageBox::critical(this,"错误","面转轴与弧转轴重合!");
+                return;
+            }
+
+            if(!axis1.IsParallel(ax2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","面转轴与弧转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+    }
+    else if(shape2.ShapeType() == TopAbs_FACE && shape1.ShapeType() == TopAbs_EDGE) {
+        Handle(Geom_Surface) face1 = BRep_Tool::Surface(TopoDS::Face(shape2));
+        double a,b;
+        Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
+
+        gp_Ax1 axis1;gp_Pln pln1;
+        gp_Lin lin2;gp_Ax2 ax2;
+        bool reta1 = GeneralTools::GetAxis(face1,axis1);
+        bool reta2 = GeneralTools::GetLine(curve2,lin2);
+        bool retb1 = GeneralTools::GetPlane(shape2,pln1);
+        bool retb2 = GeneralTools::GetCenter(curve2,ax2);
+        //平面和直线
+        if(retb1 && reta2) {
+            if(pln1.Distance(lin2) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线在平面上!");
+                return;
+            }
+
+            if(!pln1.Axis().IsNormal(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线不与平面垂直!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(lin2.Location(),face1);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,lin2.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //平面和圆弧
+        else if(retb1 && retb2) {
+            if(!pln1.Axis().IsNormal(ax2.Axis(), 1e-6) && !pln1.Axis().IsParallel(ax2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","平面与圆弧不平行!");
+                return;
+            }
+
+            GeomAPI_ProjectPointOnSurf PPOS(ax2.Location(),face1);
+            gp_Pnt np = PPOS.NearestPoint();
+            gp_Ax1 plnAxis(np,ax2.Direction());
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //旋转面和直线
+        else if(reta1 && reta2) {
+            if(gp_Lin(axis1).Distance(lin2) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            if(!axis1.IsParallel(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //旋转面和圆弧
+        else if(reta1 && retb2) {
+            if(gp_Lin(axis1).Distance(gp_Lin(ax2.Location(),ax2.Direction())) < 1e-6) {
+                QMessageBox::critical(this,"错误","面转轴与圆弧转轴不平行!");
+                return;
+            }
+
+            if(!axis1.IsParallel(ax2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","面转轴与弧转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+    }
+    else if(shape1.ShapeType() == TopAbs_EDGE && shape2.ShapeType() == TopAbs_EDGE) {
+        double a,b,c,d;
+        Handle(Geom_Curve) curve1 = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
+        Handle(Geom_Curve) curve2 = BRep_Tool::Curve(TopoDS::Edge(shape2),c,d);
+        gp_Pnt p1,p2,p3,p4;
+        curve1->D0(a,p1);curve1->D0(b,p2);curve2->D0(c,p3);curve2->D0(d,p4);
+
+        gp_Ax2 axis1, axis2;
+        gp_Lin lin1, lin2;
+        bool ret1 = GeneralTools::GetLine(curve1,lin1);
+        bool ret2 = GeneralTools::GetLine(curve2,lin2);
+        bool ret3 = GeneralTools::GetCenter(curve1,axis1);
+        bool ret4 = GeneralTools::GetCenter(curve2,axis2);
+
+        // 两条线段
+        if(ret1 && ret2) {
+            if(lin1.Distance(lin2) < 1e-6) {
+                QMessageBox::critical(this,"错误","两直线相交!");
+                return;
+            }
+
+            if(!lin1.Position().IsParallel(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","两直线不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, lin1.Position(), lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //1线段2圆弧
+        else if(ret1 && ret4) {
+            if(lin1.Distance(gp_Lin(axis2.Axis())) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            if(!lin1.Position().IsParallel(axis2.Axis(), 1e-6) && !lin1.Position().IsNormal(axis2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, lin1.Position(), axis2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //1圆弧2线段
+        else if(ret3 && ret2) {
+            if(lin2.Distance(gp_Lin(axis1.Axis())) < 1e-6) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            if(!lin2.Position().IsParallel(axis1.Axis(), 1e-6) && !lin2.Position().IsNormal(axis1.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1.Axis(), lin2.Position(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+        //两条圆弧
+        else if(ret3 && ret4) {
+            gp_Lin lct1(axis1.Axis());
+            gp_Lin lct2(axis2.Axis());
+            if(lct1.Distance(lct2) < 1e-6) {
+                QMessageBox::critical(this,"错误","两个转轴不平行!");
+                return;
+            }
+
+            if(!axis1.Axis().IsParallel(axis2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","两个转轴不平行!");
+                return;
+            }
+
+            gp_Pnt p1 ,p2;gp_Ax2 oriention;
+            dimensionOfTwoAxis(box, axis1.Axis(), axis2.Axis(), p1, p2, oriention);
+            aLabel = new Label_Length(valList, p1,p2,oriention);
+        }
+    }
+
+    if(aLabel.IsNull()) {
+        QMessageBox::critical(this,"错误","不支持的距离类型!");
+        return;
+    }
+
+    occWidget->GetContext()->Display(aLabel, Standard_True);
 }
 
 void MainWindow::dimensionOfTwoAxis(const Bnd_Box &box, const gp_Ax1 &ax1, const gp_Ax1 &ax2, gp_Pnt &first, gp_Pnt &second, gp_Ax2 &oriention)
