@@ -21,9 +21,12 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <PrsDim_AngleDimension.hxx>
 #include <TopExp.hxx>
 #include <GC_MakePlane.hxx>
+#include <ProjLib.hxx>
+#include <IntAna2d_AnaIntersection.hxx>
+#include <ElCLib.hxx>
+#include <GeomAPI_IntSS.hxx>
 
 #include "Dialogs/ToleranceInput.h"
 #include "Dialogs/DiamensionInput.h"
@@ -33,6 +36,7 @@
 #include "Label/Label_Length.h"
 #include "Label/Label_Radius.h"
 #include "Label/Label_Diameter.h"
+#include "Label/Label_Angle.h"
 #include "OCCTool/PMIModel.h"
 #include "OCCTool/GeneralTools.h"
 
@@ -349,7 +353,6 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
                                        const gp_Pnt &touch1, const gp_Pnt &touch2,
                                        const gp_Pln& place, int type)
 {
-    Handle(PrsDim_Dimension) label;
     Handle(AIS_Shape) pMd = new AIS_Shape(pmiModel->GetOriginShape());
     Bnd_Box box = pMd->BoundingBox();
     switch(type)
@@ -386,114 +389,8 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
     }
         //角度
     case 2:{
-        if(shape1.ShapeType() == TopAbs_EDGE && shape2.ShapeType() == TopAbs_EDGE) {
-            gp_Lin lin1,lin2;
-            BRep_Tool bpt;
-            double a,b,c,d;
-            Handle(Geom_Curve) cva =bpt.Curve(TopoDS::Edge(shape1),a,b);
-            Handle(Geom_Curve) cvb =bpt.Curve(TopoDS::Edge(shape2),c,d);
-            bool ret1 = GeneralTools::GetLine(cva,lin1);
-            bool ret2 = GeneralTools::GetLine(cvb,lin2);
-            if(ret1 && ret2) {
-                if(lin1.Position().IsParallel(lin2.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","两直线平行!");
-                    return;
-                }
-
-                label = new PrsDim_AngleDimension(TopoDS::Edge(shape1), TopoDS::Edge(shape2));
-            }
-            else {
-                QMessageBox::critical(this,"错误","所选类型不能计算角度!");
-                return;
-            }
-        }
-        else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_FACE) {
-            Handle(Geom_Surface) surface1 = BRep_Tool::Surface(TopoDS::Face(shape1));
-            Handle(Geom_Surface) surface2 = BRep_Tool::Surface(TopoDS::Face(shape2));
-            gp_Pln pln1, pln2;gp_Ax1 axis1, axis2;
-            bool ret1 = GeneralTools::GetPlane(shape1,pln1);
-            bool ret2 = GeneralTools::GetPlane(shape2,pln2);
-            bool ret3 = GeneralTools::GetAxis(surface1, axis1);
-            bool ret4 = GeneralTools::GetAxis(surface2, axis2);
-
-            //两个平面
-            if(ret1 && ret2) {
-                if(pln1.Axis().IsParallel(pln2.Axis(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","两平面平行!");
-                    return;
-                }
-
-                label = new PrsDim_AngleDimension(TopoDS::Face(shape1), TopoDS::Face(shape2));
-            }
-            //两个旋转面
-            else if(ret3 && ret4) {
-            }
-            else {
-                QMessageBox::critical(this,"错误","所选类型不能计算角度!");
-                return;
-            }
-        }
-        else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_EDGE) {
-            Handle(Geom_Surface) surface = BRep_Tool::Surface(TopoDS::Face(shape1));
-            double a,b;
-            Handle(Geom_Curve) curve = BRep_Tool::Curve(TopoDS::Edge(shape2),a,b);
-
-            gp_Ax1 axis; gp_Lin lin;
-            bool ret1 = GeneralTools::GetAxis(surface,axis);
-            bool ret2 = GeneralTools::GetLine(curve,lin);
-            if(ret1 && ret2) {
-                if(axis.IsParallel(lin.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与轴线平行!");
-                    return;
-                }
-
-                if(lin.Distance(gp_Lin(axis)) > 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与轴线异面!");
-                    return;
-                }
-
-                gp_Pnt p1 = curve->Value(a);
-                gp_Pnt p2 = curve->Value(b);
-                gp_Pnt p3 = axis.Location();
-
-                label = new PrsDim_AngleDimension(p1,p2,p3);
-            }
-            else {
-                QMessageBox::critical(this,"错误","所选类型不能计算角度!");
-                return;
-            }
-        }
-        else if(shape2.ShapeType() == TopAbs_FACE && shape1.ShapeType() == TopAbs_EDGE) {
-            Handle(Geom_Surface) surface = BRep_Tool::Surface(TopoDS::Face(shape2));
-            double a,b;
-            Handle(Geom_Curve) curve = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
-
-            gp_Ax1 axis; gp_Lin lin;
-            bool ret1 = GeneralTools::GetAxis(surface,axis);
-            bool ret2 = GeneralTools::GetLine(curve,lin);
-            if(ret1 && ret2) {
-                if(axis.IsParallel(lin.Position(), 1e-6)) {
-                    QMessageBox::critical(this,"错误","直线与轴线平行!");
-                    return;
-                }
-
-                if(lin.Distance(gp_Lin(axis)) > 1e-6) {
-                    QMessageBox::critical(this,"错误","直线与轴线异面!");
-                    return;
-                }
-
-                gp_Pnt p1 = curve->Value(a);
-                gp_Pnt p2 = curve->Value(b);
-                gp_Pnt p3 = axis.Location();
-
-                label = new PrsDim_AngleDimension(p1,p2,p3);
-            }
-            else {
-                QMessageBox::critical(this,"错误","所选类型不能计算角度!");
-                return;
-            }
-        }
-        break;
+        measureAngle(valList, shape1, shape2, touch1, touch2);
+        return;
     }
         //直径
     case 3:{
@@ -542,20 +439,7 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
         break;
     }
     }
-
-    if(label.IsNull()) {
-        QMessageBox::critical(this,"错误","所选类型暂不支持!");
-        return;
-    }
-
-    Handle(Prs3d_DimensionAspect) dimensionAspect = new Prs3d_DimensionAspect();
-    dimensionAspect->SetCommonColor (Quantity_NOC_BLACK);
-    Handle(Prs3d_TextAspect) txtAspect = new Prs3d_TextAspect();
-    txtAspect->SetHeight(18);
-    txtAspect->SetColor(Quantity_NOC_BLACK);
-    dimensionAspect->SetTextAspect(txtAspect);
-    label->SetDimensionAspect(dimensionAspect);
-    occWidget->GetContext()->Display(label,Standard_True);
+    QMessageBox::critical(this,"错误","所选类型暂不支持!");
 }
 
 void MainWindow::on_addDatumLabel(const QString &str, const TopoDS_Shape& shape, const gp_Pln &place, const gp_Pnt& touch)
@@ -684,7 +568,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, axis2, p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, axis2, p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //两个平面
@@ -704,7 +588,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis2(np,plnAxis1.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis1, plnAxis2, p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis1, plnAxis2, p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //1是旋转面，2是平面
@@ -723,7 +607,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,axis1.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, plnAxis, p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, plnAxis, p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //1是平面2是旋转面
@@ -742,7 +626,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,axis2.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis, axis2, p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis, axis2, p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
     }
@@ -773,7 +657,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,lin2.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //平面和圆弧
@@ -787,7 +671,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,ax2.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //旋转面和直线
@@ -803,7 +687,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //旋转面和圆弧
@@ -819,7 +703,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
     }
@@ -850,7 +734,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,lin2.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis, lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //平面和圆弧
@@ -864,7 +748,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             gp_Pnt np = PPOS.NearestPoint();
             gp_Ax1 plnAxis(np,ax2.Direction());
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, plnAxis, ax2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //旋转面和直线
@@ -880,7 +764,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //旋转面和圆弧
@@ -896,7 +780,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1, ax2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
     }
@@ -927,7 +811,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, lin1.Position(), lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, lin1.Position(), lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //1线段2圆弧
@@ -943,7 +827,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, lin1.Position(), axis2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, lin1.Position(), axis2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //1圆弧2线段
@@ -959,7 +843,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1.Axis(), lin2.Position(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1.Axis(), lin2.Position(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
         //两条圆弧
@@ -977,7 +861,7 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
             }
 
             gp_Pnt p1 ,p2;gp_Ax2 oriention;
-            dimensionOfTwoAxis(box, axis1.Axis(), axis2.Axis(), p1, p2, oriention);
+            lengthOfTwoAxis(box, axis1.Axis(), axis2.Axis(), p1, p2, oriention);
             aLabel = new Label_Length(valList, p1,p2,oriention);
         }
     }
@@ -990,7 +874,148 @@ void MainWindow::measureLength(const Bnd_Box &box, const QList<NCollection_Utf8S
     occWidget->GetContext()->Display(aLabel, Standard_True);
 }
 
-void MainWindow::dimensionOfTwoAxis(const Bnd_Box &box, const gp_Ax1 &ax1, const gp_Ax1 &ax2, gp_Pnt &first, gp_Pnt &second, gp_Ax2 &oriention)
+void MainWindow::measureAngle(const QList<NCollection_Utf8String> &valList,
+                              const TopoDS_Shape &shape1, const TopoDS_Shape &shape2,
+                              const gp_Pnt &touch1, const gp_Pnt &touch2)
+{
+    Handle(Label_Angle) aLabel;
+    if(shape1.ShapeType() == TopAbs_EDGE && shape2.ShapeType() == TopAbs_EDGE) {
+        gp_Lin lin1,lin2;
+        BRep_Tool bpt;
+        double a,b,c,d;
+        Handle(Geom_Curve) cva =bpt.Curve(TopoDS::Edge(shape1),a,b);
+        Handle(Geom_Curve) cvb =bpt.Curve(TopoDS::Edge(shape2),c,d);
+        bool ret1 = GeneralTools::GetLine(cva,lin1);
+        bool ret2 = GeneralTools::GetLine(cvb,lin2);
+        if(ret1 && ret2) {
+            if(lin1.Position().IsParallel(lin2.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","两直线平行!");
+                return;
+            }
+
+            if(lin1.Distance(lin2) > 1e-6) {
+                QMessageBox::critical(this,"错误","两直线异面!");
+                return;
+            }
+
+            gp_Pnt center = intersectionOfLines(lin1, lin2);
+
+            aLabel = new Label_Angle(valList,
+                                     touch1, center, touch2);
+            gp_Trsf pan;
+            gp_Dir normal = (touch1.XYZ()-center.XYZ()) ^ (touch2.XYZ()-center.XYZ());
+            pan.SetTranslation(0.01*normal);
+            aLabel->SetLocalTransformation(pan);
+        }
+        else {
+            QMessageBox::critical(this,"错误","所选类型不能计算角度!");
+            return;
+        }
+    }
+    else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_FACE) {
+        Handle(Geom_Surface) surface1 = BRep_Tool::Surface(TopoDS::Face(shape1));
+        Handle(Geom_Surface) surface2 = BRep_Tool::Surface(TopoDS::Face(shape2));
+        gp_Pln pln1, pln2;gp_Ax1 axis1, axis2;
+        bool ret1 = GeneralTools::GetPlane(shape1,pln1);
+        bool ret2 = GeneralTools::GetPlane(shape2,pln2);
+
+        //两个平面
+        if(ret1 && ret2) {
+            if(pln1.Axis().IsParallel(pln2.Axis(), 1e-6)) {
+                QMessageBox::critical(this,"错误","两平面平行!");
+                return;
+            }
+
+            GeomAPI_IntSS ISS(surface1, surface2, 1e-6);
+            Handle(Geom_Curve) curve = ISS.Line(1);
+
+            GeomAPI_ProjectPointOnCurve PPOC(touch1, curve);
+            gp_Pnt center = PPOC.NearestPoint();
+
+            gp_Lin inter;
+            GeneralTools::GetLine(curve, inter);
+            Handle(Geom_Plane) tmp = GC_MakePlane(inter.Position());
+            tmp->SetLocation(center);
+            GeomAPI_ProjectPointOnSurf PPOS(touch2, tmp);
+            gp_Pnt pcs = PPOS.NearestPoint();
+
+            aLabel = new Label_Angle(valList, touch1, center, pcs);
+        }
+        else {
+            QMessageBox::critical(this,"错误","所选类型不能计算角度!");
+            return;
+        }
+    }
+    else if(shape1.ShapeType() == TopAbs_FACE && shape2.ShapeType() == TopAbs_EDGE) {
+        Handle(Geom_Surface) surface = BRep_Tool::Surface(TopoDS::Face(shape1));
+        double a,b;
+        Handle(Geom_Curve) curve = BRep_Tool::Curve(TopoDS::Edge(shape2),a,b);
+
+        gp_Ax1 axis; gp_Lin lin;
+        bool ret1 = GeneralTools::GetAxis(surface,axis);
+        bool ret2 = GeneralTools::GetLine(curve,lin);
+        if(ret1 && ret2) {
+            if(axis.IsParallel(lin.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与轴线平行!");
+                return;
+            }
+
+            if(lin.Distance(gp_Lin(axis)) > 1e-6) {
+                QMessageBox::critical(this,"错误","直线与轴线异面!");
+                return;
+            }
+
+            gp_Lin linf(axis);
+            gp_Pnt center = intersectionOfLines(linf, lin);
+            GeomAPI_ProjectPointOnCurve PPOC(touch1, new Geom_Line(linf));
+            gp_Pnt pax = PPOC.NearestPoint();
+            aLabel = new Label_Angle(valList, touch2, center, pax);
+        }
+        else {
+            QMessageBox::critical(this,"错误","所选类型不能计算角度!");
+            return;
+        }
+    }
+    else if(shape2.ShapeType() == TopAbs_FACE && shape1.ShapeType() == TopAbs_EDGE) {
+        Handle(Geom_Surface) surface = BRep_Tool::Surface(TopoDS::Face(shape2));
+        double a,b;
+        Handle(Geom_Curve) curve = BRep_Tool::Curve(TopoDS::Edge(shape1),a,b);
+
+        gp_Ax1 axis; gp_Lin lin;
+        bool ret1 = GeneralTools::GetAxis(surface,axis);
+        bool ret2 = GeneralTools::GetLine(curve,lin);
+        if(ret1 && ret2) {
+            if(axis.IsParallel(lin.Position(), 1e-6)) {
+                QMessageBox::critical(this,"错误","直线与轴线平行!");
+                return;
+            }
+
+            if(lin.Distance(gp_Lin(axis)) > 1e-6) {
+                QMessageBox::critical(this,"错误","直线与轴线异面!");
+                return;
+            }
+
+            gp_Lin linf(axis);
+            gp_Pnt center = intersectionOfLines(linf, lin);
+            GeomAPI_ProjectPointOnCurve PPOC(touch2, new Geom_Line(linf));
+            gp_Pnt pax = PPOC.NearestPoint();
+            aLabel = new Label_Angle(valList, touch1, center, pax);
+        }
+        else {
+            QMessageBox::critical(this,"错误","所选类型不能计算角度!");
+            return;
+        }
+    }
+
+    if(aLabel.IsNull()) {
+        QMessageBox::critical(this,"错误","不支持的距离类型!");
+        return;
+    }
+
+    occWidget->GetContext()->Display(aLabel, Standard_True);
+}
+
+void MainWindow::lengthOfTwoAxis(const Bnd_Box &box, const gp_Ax1 &ax1, const gp_Ax1 &ax2, gp_Pnt &first, gp_Pnt &second, gp_Ax2 &oriention)
 {
     gp_Pnt p1 = ax1.Location();
     gp_Pnt p2 = ax2.Location();
@@ -1008,4 +1033,17 @@ void MainWindow::dimensionOfTwoAxis(const Bnd_Box &box, const gp_Ax1 &ax1, const
     first = p1;
     second = p3;
     oriention = gp_Ax2(target, normal, p3.XYZ()-p1.XYZ());
+}
+
+gp_Pnt MainWindow::intersectionOfLines(const gp_Lin &lin1, const gp_Lin &lin2)
+{
+    gp_Pln plane = gp_Pln (lin2.Location(), gp_Vec (lin1.Direction()) ^ gp_Vec (lin2.Direction()));
+    // Find intersection
+    gp_Lin2d aFirstLin2d  = ProjLib::Project (plane, lin1);
+    gp_Lin2d aSecondLin2d = ProjLib::Project (plane, lin2);
+
+    IntAna2d_AnaIntersection anInt2d (aFirstLin2d, aSecondLin2d);
+    gp_Pnt2d anIntersectPoint = gp_Pnt2d (anInt2d.Point(1).Value());
+    gp_Pnt center = ElCLib::To3d (plane.Position().Ax2(), anIntersectPoint);
+    return center;
 }

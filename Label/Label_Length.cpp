@@ -10,7 +10,9 @@
 #include <SelectMgr_EntityOwner.hxx>
 #include <AIS_InteractiveContext.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Geom_Line.hxx>
+#include <Geom_Plane.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Label_Length,Label_PMI)
 
@@ -37,10 +39,10 @@ void Label_Length::SetLocation(const gp_Pnt &pnt)
 {
     myHasOrientation3D = Standard_True;
 
-    gp_Lin lin(myOrientation3D.Location(),myOrientation3D.XDirection());
-    Handle(Geom_Line) line = new Geom_Line(lin);
-    GeomAPI_ProjectPointOnCurve PPC(pnt,line);
-    gp_Pnt pp = PPC.NearestPoint();
+    gp_Pln aPln((gp_Ax3(myOrientation3D)));
+    Handle(Geom_Plane) plane = new Geom_Plane(aPln);
+    GeomAPI_ProjectPointOnSurf PPOS(pnt,plane);
+    gp_Pnt pp = PPOS.NearestPoint();
 
     myOrientation3D.SetLocation(pp);
     this->SetToUpdate();

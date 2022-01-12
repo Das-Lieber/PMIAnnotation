@@ -49,6 +49,7 @@ const Standard_WideChar FONT_Position[2] = {0x0139,};
 const Standard_WideChar FONT_Axialit[2] = {0x013a,};
 const Standard_WideChar FONT_Symmetry[2] = {0x013b,};
 
+const Standard_WideChar FONT_DEGREE[2] = {0x0060,};
 const Standard_WideChar FONT_Radius[2] = {0x0040,};
 const Standard_WideChar FONT_MMC[2] = {0x0158,};
 const Standard_WideChar FONT_LMC[2] = {0x0160,};

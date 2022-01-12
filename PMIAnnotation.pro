@@ -16,6 +16,7 @@ HEADERS += \
     Dialogs/DiamensionInput.h \
     Dialogs/TolBaseInput.h \
     Dialogs/ToleranceInput.h \
+    Label/Label_Angle.h \
     Label/Label_Datum.h \
     Label/Label_Diameter.h \
     Label/Label_Length.h \
@@ -36,6 +37,7 @@ SOURCES += \
     Dialogs/DiamensionInput.cpp \
     Dialogs/TolBaseInput.cpp \
     Dialogs/ToleranceInput.cpp \
+    Label/Label_Angle.cpp \
     Label/Label_Datum.cpp \
     Label/Label_Diameter.cpp \
     Label/Label_Length.cpp \

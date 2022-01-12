@@ -80,6 +80,10 @@ void DiamensionInput::on_pushButton_sure_clicked()
         return;
     }
 
+    if(diamensionType == 2) {
+        mainVal += FONT_DEGREE;
+    }
+
     emit labelEditFinish({diaType+mainVal,upVal,lowVal},
                          myBindShape1, myBindShape2,
                          myTouch1, myTouch2,
@@ -450,6 +454,10 @@ void DiamensionInput::SetBindShape(int index, const TopoDS_Shape &shape, const g
                     Handle(Geom_Curve) cva =bpt.Curve(TopoDS::Edge(last),a,b);
                     Handle(Geom_Curve) cvb =bpt.Curve(TopoDS::Edge(shape),a,b);
                     if(GeneralTools::GetLine(cva,lin1) && GeneralTools::GetLine(cvb,lin2)) {
+                        if(lin1.Distance(lin2) > 1e-6) {
+                            QMessageBox::critical(this,"错误","两直线异面!");
+                            return;
+                        }
                         if(!lin1.Position().IsParallel(lin2.Position(), 1e-6)) {
                             ui->lineEdit_mainVal->setText(QString::number(lin1.Angle(lin2)*180/M_PI));
                         }
