@@ -11,6 +11,7 @@
 #include <GC_MakePlane.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <gp_Cone.hxx>
 
 #include "TolStringInfo.h"
 #include "OCCTool/GeneralTools.h"
@@ -569,6 +570,20 @@ void DiamensionInput::SetBindShape(int index, const TopoDS_Shape &shape, const g
         }
         //锥度
         else if(ui->comboBox_measureType->currentIndex() == 5) {
+            if(shape.ShapeType() != TopAbs_FACE) {
+                QMessageBox::critical(this,"错误","仅支持圆锥面!");
+                return;
+            }
+            Handle(Geom_Surface) face = BRep_Tool::Surface(TopoDS::Face(shape));
+            gp_Cone cone;
+            if(GeneralTools::GetCone(face, cone)) {
+                double value = 1.0/tan(cone.SemiAngle());
+                ui->lineEdit_mainVal->setText(QString("1:%1").arg(QString::number(0.5*value,'g',4)));
+            }
+            else {
+                QMessageBox::critical(this,"错误","仅支持圆锥面!");
+                return;
+            }
         }
 
         if(shapeIndex == 1) {
@@ -608,28 +623,41 @@ void DiamensionInput::on_comboBox_measureType_currentIndexChanged(int index)
         ui->stackedWidget_element->setCurrentIndex(0);
         ui->stackedWidget_reference->setCurrentIndex(1);
         diaType = "";
+        enableSubAndSup(true);
     }break;
     case 1:
     case 2:{
         ui->stackedWidget_element->setCurrentIndex(1);
         ui->stackedWidget_reference->setCurrentIndex(0);
         diaType = "";
+        enableSubAndSup(true);
     }break;
     case 3:{
         ui->stackedWidget_element->setCurrentIndex(0);
         ui->stackedWidget_reference->setCurrentIndex(0);
         diaType = FONT_Radius;
+        enableSubAndSup(true);
     }break;
     case 4:{
         ui->stackedWidget_element->setCurrentIndex(0);
         ui->stackedWidget_reference->setCurrentIndex(0);
         diaType = "R";
+        enableSubAndSup(true);
     }break;
     case 5:{
         ui->stackedWidget_element->setCurrentIndex(0);
         ui->stackedWidget_reference->setCurrentIndex(0);
         diaType = "";
+        enableSubAndSup(false);
     }break;
     }
+}
+
+void DiamensionInput::enableSubAndSup(bool ret)
+{
+    ui->lineEdit_upVal->setVisible(ret);
+    ui->lineEdit_lowVal->setVisible(ret);
+    ui->label_5->setVisible(ret);
+    ui->label_6->setVisible(ret);
 }
 

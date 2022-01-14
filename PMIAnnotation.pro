@@ -22,6 +22,7 @@ HEADERS += \
     Label/Label_Length.h \
     Label/Label_PMI.h \
     Label/Label_Radius.h \
+    Label/Label_Taper.h \
     Label/Label_Tolerance.h \
     MainWindow.h \
     OCCTool/AIS_DraftPoint.h \
@@ -43,6 +44,7 @@ SOURCES += \
     Label/Label_Length.cpp \
     Label/Label_PMI.cpp \
     Label/Label_Radius.cpp \
+    Label/Label_Taper.cpp \
     Label/Label_Tolerance.cpp \
     MainWindow.cpp \
     OCCTool/AIS_DraftPoint.cpp \

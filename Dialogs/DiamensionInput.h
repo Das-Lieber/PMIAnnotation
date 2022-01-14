@@ -45,6 +45,8 @@ private:
     NCollection_Utf8String upVal;
     NCollection_Utf8String lowVal;
 
+    void enableSubAndSup(bool ret);
+
 public slots:
     void SetBindShape(int index, const TopoDS_Shape& shape, const gp_Pnt& touch);
 

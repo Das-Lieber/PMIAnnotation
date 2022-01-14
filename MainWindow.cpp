@@ -37,6 +37,7 @@
 #include "Label/Label_Radius.h"
 #include "Label/Label_Diameter.h"
 #include "Label/Label_Angle.h"
+#include "Label/Label_Taper.h"
 #include "OCCTool/PMIModel.h"
 #include "OCCTool/GeneralTools.h"
 
@@ -374,7 +375,8 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
 
             gp_Pnt mid = 0.5*(p1.XYZ() + p2.XYZ());
             gp_Pnt target = targetWithBox(mid,normal,box);
-            gp_Ax2 oriention(target, normal, lin);
+            gp_Ax2 oriention(target, lin^normal);
+            oriention.SetYDirection(normal);
 
             Handle(Label_Length) aLabel = new Label_Length(valList, p1,p2,oriention);
             occWidget->GetContext()->Display(aLabel, Standard_True);
@@ -437,6 +439,32 @@ void MainWindow::on_addDiamensionLabel(const QList<NCollection_Utf8String> &valL
             }
         }
         break;
+    }
+        //锥度
+    case 5:{
+        if(shape1.ShapeType() == TopAbs_FACE) {
+            Handle(Geom_Surface) face = BRep_Tool::Surface(TopoDS::Face(shape1));
+            gp_Cone cone;
+            if(GeneralTools::GetCone(face, cone)) {
+                gp_Lin center = cone.Axis();
+                GeomAPI_ProjectPointOnCurve PPOC(touch1, new Geom_Line(center));
+                gp_Pnt pc = PPOC.NearestPoint();
+                gp_Dir direc = touch1.XYZ() - pc.XYZ();
+                gp_Pnt target = targetWithBox(touch1, direc, box);
+
+                gp_Dir dvx = center.Direction();
+                gp_Dir normal = dvx ^ direc;
+                gp_Ax2 oriention(target, normal, dvx);
+
+                Handle(Label_Taper) aLabel = new Label_Taper(valList[0], touch1, oriention);
+                occWidget->GetContext()->Display(aLabel, true);
+                return;
+            }
+            else {
+                QMessageBox::critical(this,"错误","仅支持锥面的锥度标注!");
+                return;
+            }
+        }
     }
     }
     QMessageBox::critical(this,"错误","所选类型暂不支持!");
